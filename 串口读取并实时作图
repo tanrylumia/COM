@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May  5 14:50:25 2019
+
+@author: Tanry
+"""
+
+#-*- coding: utf-8 -*-
+ 
+# 串口测试程序
+import serial
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+import re
+ 
+num=200
+# User input comport and bundrate
+comport =input("请输入串口（如com3）：")
+if (comport==""):
+    comport="com3"
+baudrate = input("请输入波特率（如9600）：")
+if (baudrate==""):
+    baudrate=9600
+bytes = 4
+print('You selected %s, baudrate %d, %d byte.' % (comport, int(baudrate), bytes))
+ 
+serialport = serial.Serial(comport, int(baudrate), timeout=1)
+if serialport.isOpen():
+    print("open success")
+    plt.grid(True) # 添加网格
+    plt.ion()	# interactive mode
+    plt.figure(1)
+    plt.xlabel('times')
+    plt.ylabel('data')
+    plt.title('Diagram of UART data by Python')
+    t = [j for j in range(num)]
+    m = [0 for j in range(num)]
+    i = 0
+    intdata = 0
+    data = ''
+    count = 0
+    while (intdata!=b'R'):
+        intdata=serialport.read(1)
+    #    print (intdata)
+    data=serialport.read(4)    
+    while True:
+    #    if i > 300:    # 300次数据后，清除画布，重新开始，避免数据量过大导致卡顿。
+    #        t = [0]
+    #        m = [0]
+    #        i = 0
+    #        plt.cla()
+    #    print(i)
+        data = serialport.read(5)
+        if data !='':
+    #        print (data)        
+            intdata = int(data[1:4])#int.from_bytes(data, byteorder='big', signed = False)
+    #        print('%d byte data %d' % (bytes, intdata))
+    #        i = i+1
+    #        t.append(i)
+            m=m[1:]+[intdata]
+            plt.cla()
+            plt.plot(t, m, '-r')     
+    #        plt.scatter(i, intdata)
+            plt.draw()
+        plt.pause(0.005)
+    serialport.close()
+else:
+	print("open failed")
+ 
